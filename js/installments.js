@@ -24,7 +24,7 @@
       '<td><div class="cell-user">' + UI.avatar(r.customer ? r.customer.name : '—', 'sm') + '<div><div class="nm">' + UI.esc(r.customer ? r.customer.name : '—') + '</div><div class="sub">' + UI.esc(r.customer ? r.customer.phone : '') + '</div></div></div></td>' +
       '<td><div class="t-main">' + UI.esc(r.plot ? r.plot.plotNo : '—') + '</div><div class="t-sub">' + UI.esc(r.project ? r.project.code : '') + ' · ' + UI.esc(r.project ? r.project.name : '') + '</div></td>' +
       '<td><span class="badge ' + (r.plan.type === 'Flexible' ? 'blue' : 'grey') + ' no-dot">' + r.plan.type + '</span><div class="t-sub">' + r.plan.frequency + ' · ' + r.plan.entries.length + ' ×</div></td>' +
-      '<td style="min-width:160px"><div class="progress-label"><span>' + st.paid + ' / ' + st.entries + ' paid</span><span>' + st.pct + '%</span></div>' + UI.progress(st.pct, st.overdue ? 'amber' : '') + '</td>' +
+      '<td style="min-width:160px"><div class="ratio-cell">' + UI.donut(st.pct, st.overdue ? 'amber' : '', 32, false) + '<span class="ratio-meta">' + st.paid + ' / ' + st.entries + ' paid<span class="ratio-pct">' + st.pct + '%</span></span></div></td>' +
       '<td class="num"><span class="strong">' + UI.moneyShort(st.balance) + '</span>' + (st.overdueAmount ? '<div class="t-sub tone-red">' + UI.moneyShort(st.overdueAmount) + ' overdue</div>' : '') + '</td>' +
       '<td>' + (st.completed ? '<span class="muted">—</span>' : (st.next ? UI.date(st.next.dueDate) : '—')) + '</td>' +
       '<td>' + UI.badge(r.status.label) + '</td>' +
@@ -121,8 +121,7 @@
       '<div class="plan-hero">' +
         UI.ring(st.pct, 150, 12, st.pct + '%', 'paid') +
         '<div class="info">' +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Payment progress</h3><div class="sub">' + (st.completed ? 'This installment account is fully paid and marked completed.' : (st.next ? 'Next installment #' + st.next.n + ' due ' + UI.date(st.next.dueDate) + '.' : 'No upcoming installment.')) + '</div></div>' +
-          UI.progressCell(st.pct, st.overdue ? 'amber' : '') + '</div>' +
+          '<div><h3>Payment progress</h3><div class="sub">' + (st.completed ? 'This installment account is fully paid and marked completed.' : (st.next ? 'Next installment #' + st.next.n + ' due ' + UI.date(st.next.dueDate) + '.' : 'No upcoming installment.')) + '</div></div>' +
           '<div class="plan-amounts">' +
             '<div class="pa"><div class="k">Purchase price</div><div class="v">' + UI.money(s ? s.price : 0) + '</div></div>' +
             '<div class="pa"><div class="k">Initial deposit</div><div class="v">' + UI.money(s ? s.deposit : 0) + '</div></div>' +

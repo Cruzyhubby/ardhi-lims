@@ -105,13 +105,25 @@
     return '<span class="chip outline"><span class="icon" style="color:var(--muted)">' + icon(m.icon) + '</span>' + esc(method) + '</span>';
   }
 
-  function progress(pct, tone) {
+  function donut(pct, tone, size, showLabel) {
     const v = Math.max(0, Math.min(100, Math.round(pct || 0)));
-    return '<div class="progress ' + (tone || '') + '"><span style="width:' + v + '%"></span></div>';
+    const s = size || 34;
+    const label = showLabel === false ? '' : '<span>' + v + '%</span>';
+    return '<span class="mini-donut ' + (tone || '') + '" style="--p:' + v + ';--size:' + s + 'px" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + v + '">' + label + '</span>';
   }
-  function progressCell(pct, tone, label) {
-    const v = Math.max(0, Math.min(100, Math.round(pct || 0)));
-    return '<div class="progress-wrap"><div class="progress ' + (tone || '') + '" style="flex:1"><span style="width:' + v + '%"></span></div><span class="val">' + (label != null ? label : v + '%') + '</span></div>';
+  function partsDonut(parts, size, center, sub, label) {
+    size = size || 120;
+    const list = (parts || []).filter(p => p && p.value > 0);
+    const total = list.reduce((sum, p) => sum + p.value, 0) || 1;
+    let acc = 0;
+    const stops = list.map(p => {
+      const from = Math.round(acc / total * 1000) / 10;
+      acc += p.value;
+      const to = Math.round(acc / total * 1000) / 10;
+      return p.color + ' ' + from + '% ' + to + '%';
+    }).join(', ');
+    return '<div class="parts-donut" style="--size:' + size + 'px;background:' + (stops ? 'conic-gradient(' + stops + ')' : '#EDEFEC') + '" role="img" aria-label="' + esc(label || '') + '">' +
+      '<div class="pd-center"><div class="v">' + esc(center || '') + '</div>' + (sub ? '<div class="k">' + esc(sub) + '</div>' : '') + '</div></div>';
   }
   function ring(pct, size, stroke, label, sub) {
     size = size || 132; stroke = stroke || 10;
@@ -329,7 +341,8 @@
     pts.forEach((p, i) => {
       dots += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.2" fill="#fff" stroke="' + (cfg.color || '#16A34A') + '" stroke-width="2"><title>' + esc(labels[i] + ': ' + money(data[i])) + '</title></circle>';
       if (i % every === 0 || i === pts.length - 1) {
-        xlabels += '<text x="' + p[0] + '" y="' + (h - 8) + '" text-anchor="middle" font-size="9.5" fill="#9CA3AF">' + esc(labels[i]) + '</text>';
+        const anchor = i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle';
+        xlabels += '<text x="' + p[0] + '" y="' + (h - 8) + '" text-anchor="' + anchor + '" font-size="9.5" fill="#9CA3AF">' + esc(labels[i]) + '</text>';
       }
     });
     container.innerHTML =
@@ -364,8 +377,8 @@
         '</svg>' +
         '<div class="ring-label"><div class="v">' + esc(cfg.centerValue != null ? cfg.centerValue : total) + '</div><div class="k">' + esc(cfg.centerLabel || '') + '</div></div>' +
       '</div>' +
-      '<div style="display:grid;gap:9px;min-width:130px">' + segs.map(s =>
-        '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:9px;height:9px;border-radius:3px;background:' + s.color + '"></span><span style="flex:1;color:var(--muted)">' + esc(s.label) + '</span><strong style="font-variant-numeric:tabular-nums">' + esc(cfg.format ? cfg.format(s.value) : s.value) + '</strong></div>'
+      '<div style="display:grid;gap:9px;min-width:200px">' + segs.map(s =>
+        '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:9px;height:9px;border-radius:3px;background:' + s.color + '"></span><span style="flex:1;min-width:0;color:var(--muted)">' + esc(s.label) + '</span><strong style="font-variant-numeric:tabular-nums;white-space:nowrap">' + esc(cfg.format ? cfg.format(s.value) : s.value) + '</strong></div>'
       ).join('') + '</div></div>';
   }
 
@@ -373,9 +386,13 @@
     if (!container) return;
     const items = cfg.items || [];
     const max = Math.max.apply(null, items.map(i => i.value).concat([1]));
-    container.innerHTML = '<div style="display:grid;gap:14px">' + items.map(i => {
-      const pct = Math.max(2, Math.round((i.value / max) * 100));
-      return '<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>' + esc(i.label) + '</span><strong style="font-variant-numeric:tabular-nums">' + esc(cfg.format ? cfg.format(i.value) : i.value) + '</strong></div><div class="progress" style="height:8px"><span style="width:' + pct + '%;background:' + (i.color || '#16A34A') + '"></span></div></div>';
+    container.innerHTML = '<div class="hbar-chart" role="img" aria-label="' + esc(cfg.label || 'Bar chart') + '">' + items.map(i => {
+      const pct = Math.max(1, Math.round((i.value / max) * 100));
+      return '<div class="hbar-row">' +
+        '<span class="hbar-label" title="' + esc(i.label) + '">' + esc(i.label) + '</span>' +
+        '<span class="hbar-plot"><span class="hbar-fill" style="width:' + pct + '%;background:' + (i.color || '#16A34A') + '"></span></span>' +
+        '<span class="hbar-val">' + esc(cfg.format ? cfg.format(i.value) : i.value) + '</span>' +
+      '</div>';
     }).join('') + '</div>';
   }
 
@@ -451,7 +468,7 @@
   global.UI = {
     $, $$, esc, money, num, moneyShort, numberShort, date, dateTime, relTime, greeting,
     initials, avatar, badge, icon, methodChip, methodMeta,
-    progress, progressCell, ring,
+    donut, ring, partsDonut,
     modal, confirm: confirmDialog, toast, printElement, download,
     filterRows, debounce, readForm, validate, patterns, clearErrors, fieldError,
     lineChart, donutChart, barChart, emptyState, options,

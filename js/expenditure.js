@@ -6,10 +6,21 @@
   const $$ = UI.$$;
 
   const CATEGORIES = [
-    'Land survey & titling', 'Utilities', 'Transport & fuel', 'Office supplies',
-    'Rent & facilities', 'Marketing & outreach', 'Professional services',
-    'Repairs & maintenance', 'Statutory & regulatory fees', 'Other operating costs'
+    'Salaries & wages', 'Payroll statutory contributions', 'Rent & facilities', 'Utilities',
+    'Telecom & internet', 'Office supplies', 'Cleaning & sanitation', 'Transport & fuel',
+    'Travel & accommodation', 'Security services', 'Insurance', 'Land survey & titling',
+    'Statutory & regulatory fees', 'Professional services', 'Marketing & outreach',
+    'Repairs & maintenance', 'Equipment & tools', 'Training & development',
+    'Bank charges', 'Courier & postage'
   ];
+  const OTHER_VALUE = '__other';
+  const OTHER_LABEL = 'Other operating costs';
+
+  function allCategories() {
+    const list = CATEGORIES.slice();
+    Store.db.expenses.forEach(e => { if (list.indexOf(e.category) === -1) list.push(e.category); });
+    return list;
+  }
   const METHODS = ['Bank Transfer', 'M-Pesa', 'Tigo Pesa', 'Airtel Money', 'Cash', 'Cheque'];
   const PERIODS = [
     { value: 'month', label: 'This month' },
@@ -84,12 +95,19 @@
   function charts(rows) {
     const byCat = {};
     rows.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
-    const cats = Object.keys(byCat).sort((a, b) => byCat[b] - byCat[a]).slice(0, 6);
-    UI.barChart($('#expCatChart'), {
-      items: cats.map((c, i) => ({ label: c, value: byCat[c], color: COLORS[i % COLORS.length] })),
-      format: UI.moneyShort
+    const all = Object.keys(byCat).sort((a, b) => byCat[b] - byCat[a]);
+    const top = all.slice(0, 6);
+    const restAmt = all.slice(6).reduce((s, c) => s + byCat[c], 0);
+    const catSegs = top.map((c, i) => ({ label: c, value: byCat[c], color: COLORS[i % COLORS.length] }));
+    if (restAmt > 0) catSegs.push({ label: 'Other categories (' + (all.length - 6) + ')', value: restAmt, color: '#A3A3A3' });
+    const totalSpend = rows.reduce((s, e) => s + e.amount, 0);
+    UI.donutChart($('#expCatChart'), {
+      centerValue: UI.moneyShort(totalSpend),
+      centerLabel: 'total spend',
+      format: UI.moneyShort,
+      segments: catSegs
     });
-    if (!cats.length) $('#expCatChart').innerHTML = '<div class="muted small">No entries in the selected period.</div>';
+    if (!all.length) $('#expCatChart').innerHTML = '<div class="muted small">No entries in the selected period.</div>';
 
     const now = Store.today();
     const items = [];
@@ -99,7 +117,7 @@
       const value = Store.db.expenses.filter(e => e.date.slice(0, 7) === key).reduce((s, e) => s + e.amount, 0);
       items.push({ label: d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }), value, color: '#16A34A' });
     }
-    UI.barChart($('#expTrendChart'), { items, format: UI.moneyShort });
+    UI.lineChart($('#expTrendChart'), { labels: items.map(i => i.label), data: items.map(i => i.value), height: 210, format: UI.moneyShort });
   }
 
   function periodLabel() {
@@ -139,7 +157,8 @@
       body: '<form id="expForm" novalidate>' +
         '<div class="form-grid">' +
           '<div class="field" data-field="date"><label>Date <span class="req">*</span></label><input class="input" type="date" name="date" max="' + todayISO + '" value="' + todayISO + '" /><span class="error-msg">Select the expenditure date.</span></div>' +
-          '<div class="field" data-field="category"><label>Category <span class="req">*</span></label><select class="select" name="category">' + UI.options(CATEGORIES.map(c => ({ value: c, label: c }))) + '</select><span class="error-msg">Select a category.</span></div>' +
+          '<div class="field" data-field="category"><label>Category <span class="req">*</span></label><select class="select" name="category">' + UI.options(allCategories().map(c => ({ value: c, label: c })).concat([{ value: OTHER_VALUE, label: OTHER_LABEL }])) + '</select><span class="error-msg">Select a category.</span></div>' +
+          '<div class="field" data-field="customCategory" id="expCustomField" style="display:none"><label>Specify expenditure type <span class="req">*</span></label><input class="input" name="customCategory" placeholder="e.g. Courier and postage, borehole drilling, land compensation" /><span class="error-msg">Enter the expenditure type.</span><span class="hint">Type the exact expenditure type. It will be saved as a category in the register.</span></div>' +
           '<div class="field" data-field="amount"><label>Amount (TZS) <span class="req">*</span></label><input class="input" type="number" name="amount" min="1" step="1000" placeholder="e.g. 450000" /><span class="error-msg">Enter an amount greater than zero.</span></div>' +
           '<div class="field" data-field="method"><label>Payment method <span class="req">*</span></label><select class="select" name="method">' + UI.options(METHODS.map(m => ({ value: m, label: m }))) + '</select></div>' +
           '<div class="field" data-field="payee"><label>Payee <span class="req">*</span></label><input class="input" name="payee" placeholder="Supplier, vendor or institution" /><span class="error-msg">Enter the payee.</span></div>' +
@@ -152,6 +171,13 @@
       footer: '<button class="btn btn-outline" data-x="cancel">Cancel</button><button class="btn btn-primary" type="submit" form="expForm">' + Icons.get('check') + 'Record expenditure</button>',
       onMount(el, close) {
         const form = $('#expForm', el);
+        const catSel = form.elements.category;
+        const customField = $('#expCustomField', el);
+        const customInput = form.elements.customCategory;
+        catSel.addEventListener('change', () => {
+          customField.style.display = catSel.value === OTHER_VALUE ? '' : 'none';
+          if (catSel.value !== OTHER_VALUE) customInput.value = '';
+        });
         $('[data-x="cancel"]', el).addEventListener('click', close);
         form.addEventListener('submit', (ev) => {
           ev.preventDefault();
@@ -161,11 +187,24 @@
             { name: 'payee', required: true, msg: 'Enter the payee.' },
             { name: 'description', required: true, msg: 'Describe the expenditure.' }
           ]);
+          let customOk = true;
+          if (catSel.value === OTHER_VALUE && !customInput.value.trim()) {
+            UI.fieldError(customInput, 'Enter the expenditure type.');
+            customOk = false;
+          }
           const amount = Number(form.elements.amount.value);
           if (!(amount > 0)) { UI.fieldError(form.elements.amount, 'Enter an amount greater than zero.'); return; }
           if (form.elements.date.value > Store.iso(Store.today())) { UI.fieldError(form.elements.date, 'The date cannot be in the future.'); return; }
-          if (!ok) return;
+          if (!ok || !customOk) return;
           const data = UI.readForm(form);
+          if (catSel.value === OTHER_VALUE) {
+            const typed = customInput.value.trim();
+            const existing = allCategories().find(c => c.toLowerCase() === typed.toLowerCase());
+            data.category = existing || typed;
+          } else {
+            data.category = catSel.value;
+          }
+          delete data.customCategory;
           data.amount = amount;
           const e = Store.addExpense(data);
           close();
@@ -217,20 +256,20 @@
           '<div class="mini-stat"><div class="ms-icon amber">' + Icons.get('reports') + '</div><div><div class="k">Largest category</div><div class="v">' + UI.moneyShort(st.topAmount) + '</div><div class="small muted">' + UI.esc(st.top || 'No entries') + '</div></div></div>' +
           '<div class="mini-stat"><div class="ms-icon">' + Icons.get('receipt') + '</div><div><div class="k">Register entries</div><div class="v">' + rows.length + '</div><div class="small muted">' + UI.esc(r.label) + '</div></div></div>' +
         '</div>' +
+        '<div class="split-2" style="margin-bottom:16px">' +
+          '<div class="card"><div class="card-head"><div><h3>Six-month trend</h3><div class="sub">All recorded expenditure</div></div></div><div class="card-body" id="expTrendChart"></div></div>' +
+          '<div class="card"><div class="card-head"><div><h3>Spending by category</h3><div class="sub">' + UI.esc(periodLabel()) + '</div></div></div><div class="card-body" id="expCatChart"></div></div>' +
+        '</div>' +
         '<div class="card">' +
           '<div class="filter-bar">' +
             '<div class="field-inline" style="width:280px"><span data-x>' + Icons.get('search') + '</span><input class="input search-input" id="expSearch" placeholder="Search voucher, payee, description…" /></div>' +
-            '<select class="select" id="expCategory">' + UI.options([{ value: 'all', label: 'All categories' }].concat(CATEGORIES.map(c => ({ value: c, label: c }))), state.category) + '</select>' +
+            '<select class="select" id="expCategory">' + UI.options([{ value: 'all', label: 'All categories' }].concat(allCategories().map(c => ({ value: c, label: c }))), state.category) + '</select>' +
             '<select class="select" id="expProject"><option value="all">All projects</option>' + Store.db.projects.map(p => '<option value="' + p.id + '"' + (state.project === p.id ? ' selected' : '') + '>' + UI.esc(p.name) + '</option>').join('') + '</select>' +
             '<select class="select" id="expPeriod">' + UI.options(PERIODS, state.period) + '</select>' +
             '<div class="spacer"></div><span class="filter-count" id="expCount">' + rows.length + ' of ' + rows.length + '</span>' +
           '</div>' +
           tableHTML(rows) +
           '<div class="table-foot"><span id="expFoot">Total: ' + UI.money(st.total) + '</span><span class="muted small">Simulated expenditure records · no real money is moved.</span></div>' +
-        '</div>' +
-        '<div class="split-2" style="margin-top:16px">' +
-          '<div class="card"><div class="card-head"><div><h3>Spending by category</h3><div class="sub">' + UI.esc(periodLabel()) + '</div></div></div><div class="card-body" id="expCatChart"></div></div>' +
-          '<div class="card"><div class="card-head"><div><h3>Six-month trend</h3><div class="sub">All recorded expenditure</div></div></div><div class="card-body" id="expTrendChart"></div></div>' +
         '</div>' +
         '<div class="notice info" style="margin-top:16px">' + Icons.get('info') + '<div><strong>Role separation.</strong> Accountant records expenditure; Owner and Manager can view the register and print reports; Cashier has no expenditure access. Approval, correction and reversal workflows are not defined in this prototype.</div></div>' +
       '</div>';

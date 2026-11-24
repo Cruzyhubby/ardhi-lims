@@ -21,7 +21,7 @@
       '<td><div class="cell-user">' + UI.avatar(c ? c.name : '—', 'sm') + '<div><div class="nm">' + UI.esc(c ? c.name : '—') + '</div><div class="sub">' + UI.esc(c ? c.phone : '') + '</div></div></div></td>' +
       '<td><div class="t-main">' + UI.esc(plot ? plot.plotNo : '—') + '</div><div class="t-sub">' + UI.esc(prj ? prj.name : '') + '</div></td>' +
       '<td class="num strong">' + UI.money(s.price) + '</td>' +
-      '<td style="min-width:150px"><div class="progress-label"><span>' + UI.moneyShort(paid) + ' paid</span><span>' + pct + '%</span></div>' + UI.progress(pct, balance > 0 ? '' : '') + '</td>' +
+      '<td style="min-width:150px"><div class="ratio-cell">' + UI.donut(pct, '', 32, false) + '<span class="ratio-meta">' + UI.moneyShort(paid) + ' paid<span class="ratio-pct">' + pct + '%</span></span></div></td>' +
       '<td class="num">' + (balance > 0 ? '<span class="tone-amber strong">' + UI.moneyShort(balance) + '</span>' : '<span class="badge green no-dot">Settled</span>') + '</td>' +
       '<td>' + UI.esc(s.agent) + '</td>' +
       '<td>' + UI.badge(s.status) + '</td>' +
@@ -246,7 +246,17 @@
           '<div class="item"><div class="k">Outstanding</div><div class="v" style="color:' + (balance > 0 ? 'var(--amber)' : 'var(--green-600)') + '">' + UI.money(balance) + '</div></div>' +
           '<div class="item"><div class="k">Status</div><div class="v">' + UI.badge(s.status) + '</div></div>' +
         '</div>' +
-        '<div><div class="progress-label"><span>Payment progress</span><span>' + pct + '%</span></div>' + UI.progress(pct) + '</div>' +
+        '<div class="compo"><div class="compo-head"><span>Payment progress</span><strong>' + pct + '% paid</strong></div>' +
+          '<div class="status-chart">' +
+          UI.partsDonut([
+            { value: paid, color: 'var(--green)' },
+            { value: Math.max(0, s.price - paid), color: '#D6DAD4' }
+          ], 104, pct + '%', 'paid', 'Paid ' + UI.money(paid) + ', outstanding ' + UI.money(Math.max(0, s.price - paid))) +
+          '<div class="status-legend">' +
+            '<div class="sl-row"><span class="lg-inline"><i class="paid"></i>Paid to date</span><strong>' + UI.money(paid) + '</strong></div>' +
+            '<div class="sl-row"><span class="lg-inline"><i class="out"></i>Outstanding</span><strong style="color:' + (balance > 0 ? 'var(--amber)' : 'inherit') + '">' + UI.money(Math.max(0, s.price - paid)) + '</strong></div>' +
+          '</div></div>' +
+        '</div>' +
         '<div class="split-2" style="gap:22px">' +
           '<div><div class="panel-title">Customer</div><dl class="kv">' +
             '<dt>Name</dt><dd>' + UI.esc(c ? c.name : '—') + '</dd><dt>Phone</dt><dd>' + UI.esc(c ? c.phone : '—') + '</dd><dt>NIDA</dt><dd class="mono">' + UI.esc(c ? c.nida : '—') + '</dd><dt>Email</dt><dd>' + UI.esc(c ? c.email : '—') + '</dd>' +

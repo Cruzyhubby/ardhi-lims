@@ -234,9 +234,12 @@
 
       const methodTotals = {};
       Store.db.payments.forEach(p => { methodTotals[p.method] = (methodTotals[p.method] || 0) + p.amount; });
-      UI.barChart($('#methodChart', el), {
-        items: METHODS.map((mth, i) => ({ label: mth, value: methodTotals[mth] || 0, color: ['#16A34A', '#2563EB', '#DC2626', '#6B7280', '#F59E0B', '#7C3AED'][i] })),
-        format: (v) => UI.moneyShort(v)
+      const methodSegs = METHODS.map((mth, i) => ({ label: mth, value: methodTotals[mth] || 0, color: ['#16A34A', '#2563EB', '#DC2626', '#6B7280', '#F59E0B', '#7C3AED'][i] })).filter(s => s.value > 0);
+      UI.donutChart($('#methodChart', el), {
+        centerValue: UI.moneyShort(methodSegs.reduce((s, x) => s + x.value, 0)),
+        centerLabel: 'collected',
+        format: UI.moneyShort,
+        segments: methodSegs
       });
     },
 

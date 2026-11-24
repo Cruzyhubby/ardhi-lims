@@ -648,16 +648,6 @@ table.data tr.row-danger:hover td { background: #FFF5F5; }
 .empty-state h4 { font-size: 14px; color: var(--ink); font-weight: 620; margin-bottom: 3px; }
 .empty-state p { font-size: 12.5px; max-width: 360px; margin: 0 auto; }
 
-/* Progress */
-.progress { height: 6px; border-radius: 99px; background: #EDEFEC; overflow: hidden; width: 100%; }
-.progress > span { display: block; height: 100%; border-radius: 99px; background: var(--green); transition: width .4s ease; }
-.progress.thin { height: 4px; }
-.progress.amber > span { background: #F59E0B; }
-.progress.red > span { background: var(--red); }
-.progress-wrap { display: flex; align-items: center; gap: 10px; min-width: 132px; }
-.progress-wrap .val { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
-.progress-label { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-bottom: 6px; }
-
 .ring { position: relative; display: inline-grid; place-items: center; }
 .ring svg { transform: rotate(-90deg); }
 .ring .ring-label { position: absolute; text-align: center; line-height: 1.15; }

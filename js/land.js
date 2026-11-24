@@ -85,7 +85,7 @@
           '<div class="ps"><div class="k">Available</div><div class="v">' + avail + '</div></div>' +
           '<div class="ps"><div class="k">Sold / inst.</div><div class="v">' + (sold + inst) + '</div></div>' +
         '</div>' +
-        '<div><div class="progress-label"><span>Take-up</span><span>' + pct + '%</span></div>' + UI.progress(pct) + '</div>' +
+        '<div class="takeup-row"><span class="takeup-label">Take-up</span>' + UI.donut(pct, '', 46) + '</div>' +
       '</div>' +
       '<div class="project-foot">' +
         '<button class="btn btn-sm btn-outline" data-view-project="' + pr.id + '">' + Icons.get('eye') + 'Open</button>' +

@@ -202,7 +202,7 @@
         '</div></div>' +
         '<div class="card"><div class="card-head"><div><h3>Installment plan</h3><div class="sub">' + UI.esc(data.plan.type) + ' · ' + data.plan.termMonths + ' months · ' + UI.esc(data.plan.frequency) + '</div></div></div><div class="card-body">' +
           '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">' + UI.ring(st.pct, 132, 11, st.pct + '%', 'paid') +
-          '<div style="flex:1;min-width:150px"><div class="progress-label" style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:5px"><span>' + st.paid + ' paid</span><span>' + (st.entries - st.paid) + ' remaining</span></div>' + UI.progress(st.pct) +
+          '<div style="flex:1;min-width:150px"><div class="stack-legend" style="gap:8px 16px"><span class="lg"><i class="paid"></i>' + st.paid + ' paid</span><span class="lg"><i class="free"></i>' + (st.entries - st.paid) + ' remaining</span></div>' +
           '<div class="portal-info" style="margin-top:14px"><div><div class="pi-k">Paid to date</div><div class="pi-v">' + UI.moneyShort(Store.salePaid(s.id)) + '</div></div><div><div class="pi-k">Balance</div><div class="pi-v">' + UI.moneyShort(balance) + '</div></div></div></div></div>' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"><button class="btn btn-outline btn-sm" data-goto="schedule">' + Icons.get('installments') + 'View full schedule</button><button class="btn btn-outline btn-sm" data-goto="payments">' + Icons.get('receipt') + 'Payment history</button></div>' +
         '</div></div>' +
@@ -237,13 +237,36 @@
       const state = Store.entryState(e);
       return '<tr><td class="mono">#' + e.n + '</td><td>' + UI.date(e.dueDate) + '</td><td class="num">' + UI.money(e.amount) + '</td><td class="num">' + (e.paid ? UI.money(e.paid) : '—') + '</td><td class="num">' + UI.money(Math.max(0, e.amount - (e.paid || 0))) + '</td><td>' + entryLabel(e) + '</td><td>' + (state === 'paid' ? UI.date(e.paidDate) : '—') + '</td></tr>';
     }).join('');
+    const partialCount = plan.entries.filter(e => Store.entryState(e) === 'partial').length;
+    const counts = {
+      paid: st.paid,
+      overdue: st.overdue,
+      partial: partialCount,
+      pending: Math.max(0, st.entries - st.paid - st.overdue - partialCount)
+    };
+    const statusParts = [
+      { value: counts.paid, color: 'var(--green)' },
+      { value: counts.overdue, color: 'var(--red)' },
+      { value: counts.partial, color: '#F59E0B' },
+      { value: counts.pending, color: '#D6DAD4' }
+    ];
+    const statusLegend =
+      '<div class="status-legend">' +
+        '<div class="sl-row"><span class="lg-inline"><i class="paid"></i>Paid</span><strong>' + counts.paid + '</strong></div>' +
+        '<div class="sl-row"><span class="lg-inline"><i class="pending"></i>Pending</span><strong>' + counts.pending + '</strong></div>' +
+        '<div class="sl-row"><span class="lg-inline"><i class="overdue"></i>Overdue</span><strong style="color:' + (counts.overdue ? 'var(--red)' : 'inherit') + '">' + counts.overdue + '</strong></div>' +
+        (counts.partial ? '<div class="sl-row"><span class="lg-inline"><i class="partial"></i>Partial</span><strong>' + counts.partial + '</strong></div>' : '') +
+      '</div>';
     return heroHTML(data, 'My installment schedule', 'Agreement ' + s.ref + ' · ' + plan.type + ' plan · ' + plan.termMonths + ' months · ' + plan.frequency + ' payments.') +
       '<div class="portal-toolbar"><div><h2>Schedule details</h2><div class="sub">All amounts in Tanzanian Shillings. Amounts shown are scheduled installments; the initial deposit is recorded separately.</div></div>' +
         '<div class="right"><button class="btn btn-outline btn-sm" data-dl-schedule="1">' + Icons.get('download') + 'Download schedule</button><button class="btn btn-outline btn-sm" data-print-schedule="1">' + Icons.get('print') + 'Print schedule</button></div></div>' +
       '<div class="grid grid-2" style="margin-bottom:18px">' +
         '<div class="card"><div class="card-body"><div class="kv-cards" style="padding:0"><div class="item"><div class="k">Plan type</div><div class="v" style="font-size:14px">' + UI.esc(plan.type) + '</div><div class="small muted">' + plan.termMonths + ' months · ' + UI.esc(plan.frequency) + '</div></div><div class="item"><div class="k">Selling price</div><div class="v" style="font-size:14px">' + UI.money(s.price) + '</div><div class="small muted">Agreed price</div></div><div class="item"><div class="k">Outstanding</div><div class="v" style="font-size:14px">' + UI.money(Store.saleBalance(s.id)) + '</div><div class="small muted">' + (st.overdue ? st.overdue + ' overdue' : 'No overdue installments') + '</div></div></div></div></div>' +
-        '<div class="card"><div class="card-body"><div class="progress-label" style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:var(--muted)"><span>Payment progress</span><span>' + st.pct + '%</span></div>' + UI.progress(st.pct, st.overdue ? 'amber' : '') +
-          '<div style="display:flex;gap:18px;margin-top:12px;font-size:12px"><div><span class="muted">Paid</span><div class="strong">' + st.paid + ' installments</div></div><div><span class="muted">Pending</span><div class="strong">' + (st.entries - st.paid) + ' installments</div></div><div><span class="muted">Overdue</span><div class="strong" style="color:' + (st.overdue ? 'var(--red)' : 'inherit') + '">' + st.overdue + '</div></div></div>' +
+        '<div class="card"><div class="card-body"><div class="compo-head"><span>Installment status</span><strong>' + counts.paid + ' of ' + st.entries + ' paid</strong></div>' +
+          '<div class="status-chart">' +
+          UI.partsDonut(statusParts, 108, counts.paid + ' / ' + st.entries, 'paid', counts.paid + ' paid, ' + counts.pending + ' pending, ' + counts.overdue + ' overdue' + (counts.partial ? ', ' + counts.partial + ' partial' : '')) +
+          statusLegend +
+          '</div>' +
         '</div></div>' +
       '</div>' +
       '<div class="card"><div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Due date</th><th class="num">Scheduled</th><th class="num">Paid</th><th class="num">Remaining</th><th>Status</th><th>Paid on</th></tr></thead><tbody>' + rows + '</tbody>' +

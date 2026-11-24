@@ -196,9 +196,14 @@
         segments: d.methodRows.map(m => ({ label: m.method, value: m.amount, color: METHOD_COLORS[m.method] || '#64748B' }))
       });
       if (!d.methodRows.length) $('#finMethods', el).innerHTML = '<div class="muted small">No revenue in this period.</div>';
-      UI.barChart($('#finExpCats', el), {
-        items: d.categoryRows.slice(0, 6).map((c, i) => ({ label: c.category, value: c.amount, color: ['#16A34A', '#2563EB', '#F59E0B', '#8B5CF6', '#0EA5E9', '#64748B'][i] })),
-        format: UI.moneyShort
+      const catSegs = d.categoryRows.slice(0, 6).map((c, i) => ({ label: c.category, value: c.amount, color: ['#16A34A', '#2563EB', '#F59E0B', '#8B5CF6', '#0EA5E9', '#64748B'][i] }));
+      const restCats = d.categoryRows.slice(6).reduce((s, c) => s + c.amount, 0);
+      if (restCats > 0) catSegs.push({ label: 'Other categories (' + (d.categoryRows.length - 6) + ')', value: restCats, color: '#A3A3A3' });
+      UI.donutChart($('#finExpCats', el), {
+        centerValue: UI.moneyShort(d.spend),
+        centerLabel: 'category spend',
+        format: UI.moneyShort,
+        segments: catSegs
       });
       if (!d.categoryRows.length) $('#finExpCats', el).innerHTML = '<div class="muted small">No expenditure in this period.</div>';
       const per = $('#finPeriod', el);

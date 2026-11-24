@@ -2,7 +2,7 @@
 (function (global) {
   'use strict';
 
-  const SEED_VERSION = 8;
+  const SEED_VERSION = 10;
 
   /* ---------- helpers ---------- */
   function mulberry32(a) {
@@ -386,45 +386,78 @@
     ];
   }
 
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthLabel = (d) => MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
   const EXPENSE_KINDS = [
-    { category: 'Land survey & titling', payees: ['Geosurvey Tanzania Ltd', 'Rasco Surveys Ltd', 'Mwananchi Land Surveyors'], min: 1200000, max: 4800000, desc: 'Survey, beaconing and title documentation' },
-    { category: 'Utilities', payees: ['TANESCO', 'DAWASA'], min: 180000, max: 650000, desc: 'Electricity and water — head office' },
-    { category: 'Transport & fuel', payees: ['Puma Energy Tanzania', 'Oryx Energies'], min: 90000, max: 420000, desc: 'Field transport and fuel' },
-    { category: 'Office supplies', payees: ['Office Mart Dar', 'Stationery World Ltd'], min: 60000, max: 350000, desc: 'Office stationery and consumables' },
-    { category: 'Rent & facilities', payees: ['Mzizima Properties Ltd', 'Bahari Holdings'], min: 1800000, max: 2500000, desc: 'Monthly office rent and facilities' },
-    { category: 'Marketing & outreach', payees: ['Coastal Media Group', 'Tanzania Print House'], min: 250000, max: 1200000, desc: 'Plot sales outreach and printed materials' },
-    { category: 'Professional services', payees: ['Kagoda Advocates', 'Mbeya Audit Partners'], min: 400000, max: 1800000, desc: 'Legal and professional review services' },
-    { category: 'Repairs & maintenance', payees: ['Fundi Juma Services', 'Techfix Tanzania'], min: 120000, max: 900000, desc: 'Generator, vehicle and office repairs' },
-    { category: 'Statutory & regulatory fees', payees: ['Temeke Municipal Council', 'Ardhi Regulatory Office'], min: 300000, max: 1500000, desc: 'Municipal permits and regulatory fees' },
-    { category: 'Other operating costs', payees: ['CRDB Bank', 'DHL Tanzania'], min: 50000, max: 300000, desc: 'Courier, bank charges and other costs' }
+    { category: 'Salaries & wages', payees: ['Ardhi staff payroll'], monthlyDay: 28, refPrefix: 'PAY', desc: (d) => 'Monthly staff salaries and wages — ' + monthLabel(d) + ' (9 employees)', min: 6500000, max: 7600000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Payroll statutory contributions', payees: ['TRA · NSSF · WCF'], monthlyDay: 5, refPrefix: 'STAT', desc: (d) => 'PAYE, NSSF, WCF, SDL and NHIF remittance — ' + monthLabel(new Date(d.getFullYear(), d.getMonth() - 1, 1)), min: 1450000, max: 1750000, step: 25000, method: 'Bank Transfer' },
+    { category: 'Rent & facilities', payees: ['Mzizima Properties Ltd'], monthlyDay: 1, refPrefix: 'RENT', desc: (d) => 'Monthly office rent and service charge — ' + monthLabel(d), min: 2400000, max: 2400000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Utilities', payees: ['TANESCO', 'DAWASA'], monthlyDay: 12, refPrefix: 'UTIL', desc: 'Electricity and water — head office', min: 380000, max: 680000, step: 10000, method: 'Bank Transfer' },
+    { category: 'Telecom & internet', payees: ['Vodacom Tanzania', 'TTCL'], monthlyDay: 6, refPrefix: 'TEL', desc: 'Office internet and mobile airtime', min: 180000, max: 320000, step: 10000, method: 'M-Pesa' },
+    { category: 'Security services', payees: ['SGA Security Tanzania', 'Ultimate Security'], monthlyDay: 3, refPrefix: 'SEC', desc: 'Office and plot security services', min: 480000, max: 720000, step: 10000, method: 'Bank Transfer' },
+    { category: 'Cleaning & sanitation', payees: ['Safi Bora Cleaning Services'], monthlyDay: 15, refPrefix: 'CLN', desc: 'Office cleaning and sanitation services', min: 90000, max: 160000, step: 10000, method: 'Cash' },
+    { category: 'Land survey & titling', payees: ['Geosurvey Tanzania Ltd', 'Rasco Surveys Ltd', 'Mwananchi Land Surveyors'], count: 4, project: true, desc: 'Survey, beaconing and title documentation', min: 1400000, max: 4600000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Office supplies', payees: ['Office Mart Dar', 'Stationery World Ltd'], count: 3, desc: 'Office stationery and consumables', min: 120000, max: 380000, step: 10000, method: 'Cash' },
+    { category: 'Transport & fuel', payees: ['Puma Energy Tanzania', 'Oryx Energies'], count: 5, desc: 'Field transport and fuel', min: 160000, max: 480000, step: 10000, method: 'M-Pesa' },
+    { category: 'Travel & accommodation', payees: ['Air Tanzania', 'New Africa Hotel'], count: 2, desc: 'Upcountry site visit travel and accommodation', min: 280000, max: 850000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Insurance', payees: ['Jubilee Insurance', 'NIC Tanzania'], count: 2, desc: 'Office, vehicle and plot insurance cover', min: 420000, max: 950000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Statutory & regulatory fees', payees: ['Kinondoni Municipal Council', 'Temeke Municipal Council', 'Ministry of Lands — land rent'], count: 3, project: true, desc: 'Municipal permits, land rent and regulatory fees', min: 320000, max: 1300000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Professional services', payees: ['Kagoda Advocates', 'Mbeya Audit Partners'], count: 3, desc: 'Legal, audit and consultancy services', min: 500000, max: 1800000, step: 100000, method: 'Bank Transfer' },
+    { category: 'Marketing & outreach', payees: ['Coastal Media Group', 'Tanzania Print House', 'Radio One Tanzania'], count: 3, project: true, desc: 'Plot sales outreach and printed materials', min: 300000, max: 1100000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Repairs & maintenance', payees: ['Fundi Juma Services', 'Techfix Tanzania'], count: 3, desc: 'Generator, vehicle and office repairs', min: 140000, max: 850000, step: 10000, method: 'Cash' },
+    { category: 'Equipment & tools', payees: ['Cotech Tanzania', 'Global Technologies Ltd'], count: 2, desc: 'Survey equipment and office equipment', min: 600000, max: 2400000, step: 100000, method: 'Bank Transfer' },
+    { category: 'Training & development', payees: ['Institute of Land Administration', 'CBE Training Centre'], count: 2, desc: 'Staff training and professional development', min: 300000, max: 750000, step: 50000, method: 'Bank Transfer' },
+    { category: 'Bank charges', payees: ['CRDB Bank', 'NMB Bank'], count: 2, desc: 'Bank charges and transaction fees', min: 35000, max: 120000, step: 5000, method: 'Bank Transfer' },
+    { category: 'Courier & postage', payees: ['DHL Tanzania', 'FedEx Tanzania'], count: 3, desc: 'Courier and document delivery', min: 45000, max: 180000, step: 5000, method: 'Cash' }
   ];
 
   function buildExpenses(projects) {
     const expenses = [];
-    for (let i = 0; i < 26; i++) {
-      const kind = EXPENSE_KINDS[i % EXPENSE_KINDS.length];
-      const date = addDays(TODAY, -between(0, 170));
-      const category = kind.category;
-      const needsProject = ['Land survey & titling', 'Marketing & outreach', 'Statutory & regulatory fees'].includes(category);
-      const prj = needsProject ? projects[between(0, projects.length - 1)] : null;
-      const description = kind.desc + (prj ? ' — ' + prj.code : '');
-      const amount = roundTo(between(kind.min, kind.max), 50000);
-      const year = date.getFullYear();
+
+    const push = (kind, date, project) => {
+      const prj = project || null;
+      const desc = typeof kind.desc === 'function' ? kind.desc(date) : kind.desc;
       expenses.push({
-        id: 'EXP-' + pad(i + 1, 3),
-        voucherNo: 'PV-' + year + '-' + pad(i + 1, 3),
+        category: kind.category,
         date: iso(date),
-        category,
-        description,
+        description: desc + (prj ? ' — ' + prj.code : ''),
         payee: pick(kind.payees),
-        amount,
-        method: pick(['Bank Transfer', 'Bank Transfer', 'M-Pesa', 'Cash', 'Cheque']),
-        reference: 'INV-' + year + '-' + pad(between(100, 999), 3),
+        amount: roundTo(between(kind.min, kind.max), kind.step),
+        method: kind.method,
         projectId: prj ? prj.id : null,
         recordedBy: 'Neema Lyimo',
         createdAt: isoAt(date, 10, 20)
       });
-    }
+      return expenses[expenses.length - 1];
+    };
+
+    EXPENSE_KINDS.filter(k => k.monthlyDay).forEach(kind => {
+      for (let back = 5; back >= 0; back--) {
+        const date = new Date(TODAY.getFullYear(), TODAY.getMonth() - back, kind.monthlyDay);
+        if (date > TODAY) continue;
+        const e = push(kind, date, kind.project ? pick(projects) : null);
+        e.reference = kind.refPrefix + '-' + date.getFullYear() + '-' + pad(date.getMonth() + 1, 2);
+      }
+    });
+
+    let invSeq = 118;
+    EXPENSE_KINDS.filter(k => k.count).forEach(kind => {
+      for (let n = 0; n < kind.count; n++) {
+        const date = addDays(TODAY, -between(3, 168));
+        const e = push(kind, date, kind.project ? pick(projects) : null);
+        e.reference = 'INV-' + date.getFullYear() + '-' + pad(invSeq++, 3);
+      }
+    });
+
+    expenses.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    const seq = {};
+    expenses.forEach((e, i) => {
+      const y = e.date.slice(0, 4);
+      seq[y] = (seq[y] || 0) + 1;
+      e.id = 'EXP-' + pad(i + 1, 3);
+      e.voucherNo = 'PV-' + y + '-' + pad(seq[y], 3);
+    });
     return expenses.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }
 

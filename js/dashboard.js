@@ -88,15 +88,39 @@
         '<div class="grid grid-2-1" style="margin-top:18px">' +
           '<div class="card">' +
             '<div class="card-head"><div><h3>Project performance</h3><div class="sub">Sales and availability by land project</div></div><div class="right"><button class="btn btn-sm btn-ghost" data-go="/land">View all' + Icons.get('chevron-right') + '</button></div></div>' +
-            '<div class="card-body"><div class="project-list">' +
-              perf.map(x =>
-                '<div class="project-row">' +
-                  '<div><div class="pr-name">' + UI.esc(x.project.name) + ' <span class="code">' + UI.esc(x.project.code) + '</span></div>' +
-                  '<div class="pr-sub">' + x.total + ' plots · ' + x.available + ' available · ' + (x.sold + x.inst) + ' sold / on installment</div></div>' +
-                  '<div class="pr-val">' + x.pct + '%</div>' +
-                  '<div class="pr-bar">' + UI.progress(x.pct) + '</div>' +
-                '</div>').join('') +
-            '</div></div>' +
+            '<div class="card-body">' +
+              '<div class="stack-legend" style="margin-bottom:12px">' +
+                '<span class="lg"><i class="sold"></i>Sold</span>' +
+                '<span class="lg"><i class="inst"></i>Installment</span>' +
+                '<span class="lg"><i class="free"></i>Available</span>' +
+                '<span class="lg"><i class="res"></i>Reserved</span>' +
+              '</div>' +
+              (() => {
+                const maxTotal = Math.max.apply(null, perf.map(x => x.total).concat([1]));
+                const top = Math.ceil(maxTotal / 4) * 4;
+                const ticks = [top, Math.round(top * 0.75), Math.round(top * 0.5), Math.round(top * 0.25), 0];
+                const colHeight = v => (v / top * 100).toFixed(2) + '%';
+                return '<div class="col-chart" role="img" aria-label="Plots by status for each project">' +
+                  '<div class="cc-axis">' + ticks.map(t => '<span>' + t + '</span>').join('') + '</div>' +
+                  '<div class="cc-plot">' +
+                    '<div class="cc-grid">' + ticks.map(() => '<span></span>').join('') + '</div>' +
+                    '<div class="cc-bars">' + perf.map(x =>
+                      '<div class="cc-col" title="' + UI.esc(x.project.name + ': ' + x.sold + ' sold, ' + x.inst + ' on installment, ' + x.available + ' available, ' + x.reserved + ' reserved') + '">' +
+                        '<div class="cc-stack" style="height:' + colHeight(x.total) + '">' +
+                          '<span class="seg sold" style="height:' + (x.sold / Math.max(1, x.total) * 100).toFixed(2) + '%"></span>' +
+                          '<span class="seg inst" style="height:' + (x.inst / Math.max(1, x.total) * 100).toFixed(2) + '%"></span>' +
+                          '<span class="seg free" style="height:' + (x.available / Math.max(1, x.total) * 100).toFixed(2) + '%"></span>' +
+                          '<span class="seg res" style="height:' + (x.reserved / Math.max(1, x.total) * 100).toFixed(2) + '%"></span>' +
+                        '</div>' +
+                      '</div>').join('') +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="cc-labels">' + perf.map(x =>
+                    '<div class="cc-lab"><span class="code">' + UI.esc(x.project.code) + '</span><span class="cc-pct">' + x.pct + '%</span></div>').join('') +
+                  '</div>' +
+                '</div>';
+              })() +
+            '</div>' +
           '</div>' +
           '<div class="card">' +
             '<div class="card-head"><div><h3>Overdue overview</h3><div class="sub">' + m.overdueCount + ' installments · ' + UI.moneyShort(m.overdueAmount) + '</div></div><div class="right">' + UI.badge('Needs follow-up', 'red') + '</div></div>' +
