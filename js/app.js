@@ -8,7 +8,8 @@
 
   const NAV = [
     { group: 'Overview', items: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', title: 'Dashboard', crumb: 'Overview' }
+      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', title: 'Dashboard', crumb: 'Overview' },
+      { id: 'performance', label: 'My Performance', icon: 'target', title: 'My Performance', crumb: 'Overview' }
     ]},
     { group: 'Land & Inventory', items: [
       { id: 'land', label: 'Land Management', icon: 'land', title: 'Land Management', crumb: 'Land & Inventory' }
@@ -34,10 +35,10 @@
   ];
 
   const MODULES_BY_ROLE = {
-    Owner: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications', 'reports', 'users', 'settings'],
-    Manager: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications', 'reports', 'users', 'settings'],
-    Accountant: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications'],
-    Cashier: ['dashboard', 'customers', 'sales', 'installments', 'payments', 'notifications']
+    Owner: ['dashboard', 'performance', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications', 'reports', 'users', 'settings'],
+    Manager: ['dashboard', 'performance', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications', 'reports', 'users', 'settings'],
+    Accountant: ['dashboard', 'performance', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications'],
+    Cashier: ['dashboard', 'performance', 'customers', 'sales', 'installments', 'payments', 'notifications']
   };
 
   const CAPS = {
@@ -344,6 +345,7 @@
   /* ---------------- routing ---------------- */
   const ROUTE_TITLES = {
     dashboard: ['Dashboard', 'Overview'],
+    performance: ['My Performance', 'Overview'],
     land: ['Land Management', 'Land & Inventory'],
     customers: ['Customers', 'Sales & Customers'],
     sales: ['Sales', 'Sales & Customers'],

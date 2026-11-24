@@ -23,6 +23,7 @@
 
   const PERM_ROWS = [
     { label: 'Dashboard & overview', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
+    { label: 'My performance (own activity)', Owner: true, Manager: true, Accountant: true, Cashier: true },
     { label: 'Land & plot records', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
     { label: 'Customer & sales records', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
     { label: 'Installment management', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },

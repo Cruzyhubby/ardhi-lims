@@ -33,6 +33,7 @@ Customer portal: use a customer number (e.g. `CUS-001`) or phone number, with pa
 ## What is included
 
 - **Dashboard** — KPI cards, 8-month collections chart, portfolio donut, project performance, overdue overview, recent payments/sales, upcoming installments and staff activity.
+- **My Performance** — personal activity report for every demo account: payments/collections recorded by the signed-in user, receipts, sales attributed to them, expenditure entries, customers served, team share, six-month trend and the account's activity log, with a printable personal report. No appraisal scores, targets or rankings are calculated.
 - **Land Management** — projects and plots (CRUD), statuses, intended use, location class, plus a clearly labelled *prototype visualisation* of physical maps (no interactive digital mapping is claimed).
 - **Customers & Sales** — customer records with NIDA and next of kin, plot purchase agreements, deposits, agents and fixed/flexible installment plans. Customers automatically receive a view-only portal account.
 - **Installment Management** — fixed 6/12/18/24-month and flexible plans, weekly or monthly schedules, progress rings, paid/pending/overdue states and a printable statement.
@@ -67,7 +68,9 @@ js/icons.js              Inline SVG icon set
 js/sample-data.js        Deterministic fictional seed data
 js/store.js              Persistence, domain logic, calculations
 js/ui.js                 UI utilities, charts, modals, toasts, printing
-js/expenditure.js         Expenditure register and entry
+js/dashboard.js … js/settings.js   Feature modules
+js/performance.js        Personal "My Performance" report
+js/expenditure.js        Expenditure register and entry
 js/financial.js          Consolidated revenue & expenditure report
 js/app.js                Routing, auth/session, navigation shell
 js/customer-portal.js    Portal logic
