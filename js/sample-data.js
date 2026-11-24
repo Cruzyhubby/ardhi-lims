@@ -2,7 +2,7 @@
 (function (global) {
   'use strict';
 
-  const SEED_VERSION = 7;
+  const SEED_VERSION = 8;
 
   /* ---------- helpers ---------- */
   function mulberry32(a) {
@@ -386,6 +386,48 @@
     ];
   }
 
+  const EXPENSE_KINDS = [
+    { category: 'Land survey & titling', payees: ['Geosurvey Tanzania Ltd', 'Rasco Surveys Ltd', 'Mwananchi Land Surveyors'], min: 1200000, max: 4800000, desc: 'Survey, beaconing and title documentation' },
+    { category: 'Utilities', payees: ['TANESCO', 'DAWASA'], min: 180000, max: 650000, desc: 'Electricity and water — head office' },
+    { category: 'Transport & fuel', payees: ['Puma Energy Tanzania', 'Oryx Energies'], min: 90000, max: 420000, desc: 'Field transport and fuel' },
+    { category: 'Office supplies', payees: ['Office Mart Dar', 'Stationery World Ltd'], min: 60000, max: 350000, desc: 'Office stationery and consumables' },
+    { category: 'Rent & facilities', payees: ['Mzizima Properties Ltd', 'Bahari Holdings'], min: 1800000, max: 2500000, desc: 'Monthly office rent and facilities' },
+    { category: 'Marketing & outreach', payees: ['Coastal Media Group', 'Tanzania Print House'], min: 250000, max: 1200000, desc: 'Plot sales outreach and printed materials' },
+    { category: 'Professional services', payees: ['Kagoda Advocates', 'Mbeya Audit Partners'], min: 400000, max: 1800000, desc: 'Legal and professional review services' },
+    { category: 'Repairs & maintenance', payees: ['Fundi Juma Services', 'Techfix Tanzania'], min: 120000, max: 900000, desc: 'Generator, vehicle and office repairs' },
+    { category: 'Statutory & regulatory fees', payees: ['Temeke Municipal Council', 'Ardhi Regulatory Office'], min: 300000, max: 1500000, desc: 'Municipal permits and regulatory fees' },
+    { category: 'Other operating costs', payees: ['CRDB Bank', 'DHL Tanzania'], min: 50000, max: 300000, desc: 'Courier, bank charges and other costs' }
+  ];
+
+  function buildExpenses(projects) {
+    const expenses = [];
+    for (let i = 0; i < 26; i++) {
+      const kind = EXPENSE_KINDS[i % EXPENSE_KINDS.length];
+      const date = addDays(TODAY, -between(0, 170));
+      const category = kind.category;
+      const needsProject = ['Land survey & titling', 'Marketing & outreach', 'Statutory & regulatory fees'].includes(category);
+      const prj = needsProject ? projects[between(0, projects.length - 1)] : null;
+      const description = kind.desc + (prj ? ' — ' + prj.code : '');
+      const amount = roundTo(between(kind.min, kind.max), 50000);
+      const year = date.getFullYear();
+      expenses.push({
+        id: 'EXP-' + pad(i + 1, 3),
+        voucherNo: 'PV-' + year + '-' + pad(i + 1, 3),
+        date: iso(date),
+        category,
+        description,
+        payee: pick(kind.payees),
+        amount,
+        method: pick(['Bank Transfer', 'Bank Transfer', 'M-Pesa', 'Cash', 'Cheque']),
+        reference: 'INV-' + year + '-' + pad(between(100, 999), 3),
+        projectId: prj ? prj.id : null,
+        recordedBy: 'Neema Lyimo',
+        createdAt: isoAt(date, 10, 20)
+      });
+    }
+    return expenses.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  }
+
   function build() {
     const projects = buildProjects();
     const plots = buildPlots(projects);
@@ -396,12 +438,13 @@
     const users = buildUsers();
     const activity = buildActivity(sales, payments, users);
     const requests = buildRequests(customers, sales);
+    const expenses = buildExpenses(projects);
 
     return {
       version: SEED_VERSION,
       seededAt: new Date().toISOString(),
       projects, plots, customers, sales, plans, payments,
-      notifications, users, activity, requests,
+      notifications, users, activity, requests, expenses,
       settings: {
         companyName: 'Ardhi Land Company Limited',
         companyEmail: 'info@ardhi.co.tz',

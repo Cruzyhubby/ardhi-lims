@@ -59,6 +59,7 @@
   const plot = (id) => db.plots.find(p => p.id === id);
   const customer = (id) => db.customers.find(c => c.id === id);
   const sale = (id) => db.sales.find(s => s.id === id);
+  const expense = (id) => db.expenses.find(e => e.id === id);
   const plan = (id) => db.plans.find(p => p.id === id);
   const planBySale = (saleId) => db.plans.find(p => p.saleId === saleId);
   const user = (id) => db.users.find(u => u.id === id);
@@ -416,6 +417,31 @@
     return req;
   }
 
+  /* ---------- expenditure ---------- */
+  function addExpense(data) {
+    const date = data.date || iso(today());
+    const year = String(date).slice(0, 4);
+    const seq = db.expenses.filter(e => String(e.date).slice(0, 4) === year).length + 1;
+    const e = {
+      id: nextSeq(db.expenses, 'EXP', 3),
+      voucherNo: 'PV-' + year + '-' + pad(seq, 3),
+      date,
+      category: data.category,
+      description: (data.description || '').trim(),
+      payee: (data.payee || '').trim(),
+      amount: Number(data.amount),
+      method: data.method,
+      reference: (data.reference || '').trim(),
+      projectId: data.projectId || null,
+      recordedBy: currentUser() ? currentUser().name : 'System',
+      createdAt: new Date().toISOString()
+    };
+    db.expenses.unshift(e);
+    addActivity(e.recordedBy, 'Recorded expenditure ' + e.voucherNo + ' — TZS ' + e.amount.toLocaleString('en-US'), 'Expenditure');
+    save();
+    return e;
+  }
+
   /* ---------- users ---------- */
   function addUser(data) {
     const u = {
@@ -551,13 +577,13 @@
     DEMO_PASSWORD,
     init: load, save, reset,
     today, iso, addDays, addMonths, parseDate, daysBetween,
-    project, plot, customer, sale, plan, planBySale, user,
+    project, plot, customer, sale, expense, plan, planBySale, user,
     paymentsForSale, salesForCustomer, plotsForProject, notificationsForSale,
     salePaid, saleBalance, entryState, planStats, planStatus,
     pushNotification, unreadInternalCount, notification, markNotificationRead, markAllInternalRead, addActivity,
     addCustomer, updateCustomer,
     addProject, updateProject, setProjectMap, addPlot, updatePlot,
-    recordSale, recordPayment, sendReminder, submitRequest,
+    recordSale, recordPayment, addExpense, sendReminder, submitRequest,
     addUser, updateUser, updateSettings,
     currentUser, signIn, signOut, currentCustomer, portalSignIn, portalSignOut,
     dashboardMetrics, collectionsSeries, projectPerformance, rowForCustomer

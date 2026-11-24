@@ -19,7 +19,8 @@
     ]},
     { group: 'Finance', items: [
       { id: 'installments', label: 'Installment Management', icon: 'installments', title: 'Installment Management', crumb: 'Finance' },
-      { id: 'payments', label: 'Payment Management', icon: 'payments', title: 'Payment Management', crumb: 'Finance' }
+      { id: 'payments', label: 'Payment Management', icon: 'payments', title: 'Payment Management', crumb: 'Finance' },
+      { id: 'expenditures', label: 'Expenditure', icon: 'cash', title: 'Expenditure', crumb: 'Finance' }
     ]},
     { group: 'Operations', items: [
       { id: 'notifications', label: 'Notifications & Reminders', icon: 'bell', title: 'Notifications & Reminders', crumb: 'Operations', badge: true },
@@ -32,17 +33,17 @@
   ];
 
   const MODULES_BY_ROLE = {
-    Owner: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'notifications', 'reports', 'users', 'settings'],
-    Manager: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'notifications', 'reports', 'users', 'settings'],
-    Accountant: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'notifications'],
+    Owner: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'notifications', 'reports', 'users', 'settings'],
+    Manager: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'notifications', 'reports', 'users', 'settings'],
+    Accountant: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'notifications'],
     Cashier: ['dashboard', 'customers', 'sales', 'installments', 'payments', 'notifications']
   };
 
   const CAPS = {
-    Owner: { landWrite: true, customerWrite: true, saleWrite: true, paymentWrite: true, userManage: true, settingsWrite: true, reportsAll: true, reportsOps: true },
-    Manager: { landWrite: true, customerWrite: true, saleWrite: true, paymentWrite: true, userManage: false, settingsWrite: false, reportsAll: false, reportsOps: true },
-    Accountant: { landWrite: false, customerWrite: false, saleWrite: false, paymentWrite: true, userManage: false, settingsWrite: false, reportsAll: false, reportsOps: false },
-    Cashier: { landWrite: false, customerWrite: true, saleWrite: true, paymentWrite: true, userManage: false, settingsWrite: false, reportsAll: false, reportsOps: false }
+    Owner: { landWrite: true, customerWrite: true, saleWrite: true, paymentWrite: true, expenseWrite: false, userManage: true, settingsWrite: true, reportsAll: true, reportsOps: true },
+    Manager: { landWrite: true, customerWrite: true, saleWrite: true, paymentWrite: true, expenseWrite: false, userManage: false, settingsWrite: false, reportsAll: false, reportsOps: true },
+    Accountant: { landWrite: false, customerWrite: false, saleWrite: false, paymentWrite: true, expenseWrite: true, userManage: false, settingsWrite: false, reportsAll: false, reportsOps: false },
+    Cashier: { landWrite: false, customerWrite: true, saleWrite: true, paymentWrite: true, expenseWrite: false, userManage: false, settingsWrite: false, reportsAll: false, reportsOps: false }
   };
 
   function currentUser() { return Store.currentUser(); }
@@ -347,6 +348,7 @@
     sales: ['Sales', 'Sales & Customers'],
     installments: ['Installment Management', 'Finance'],
     payments: ['Payment Management', 'Finance'],
+    expenditures: ['Expenditure', 'Finance'],
     notifications: ['Notifications & Reminders', 'Operations'],
     reports: ['Reports', 'Operations'],
     users: ['User Management', 'Administration'],

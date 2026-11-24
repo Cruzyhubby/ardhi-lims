@@ -21,12 +21,12 @@ python -m http.server 8080
 
 ## Demo accounts
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Owner | `salma@ardhi.co.tz` | `demo1234` |
-| Manager | `juma@ardhi.co.tz` | `demo1234` |
-| Accountant | `neema@ardhi.co.tz` | `demo1234` |
-| Cashier | `baraka@ardhi.co.tz` | `demo1234` |
+| Role | Email | Password | Duties |
+| --- | --- | --- | --- |
+| Owner | `salma@ardhi.co.tz` | `demo1234` | Full oversight; expenditure read-only |
+| Manager | `juma@ardhi.co.tz` | `demo1234` | Operations; expenditure read-only |
+| Accountant | `neema@ardhi.co.tz` | `demo1234` | Payments and expenditure entry |
+| Cashier | `baraka@ardhi.co.tz` | `demo1234` | Collections: payments, customers and sales; no expenditure |
 
 Customer portal: use a customer number (e.g. `CUS-001`) or phone number, with password `demo1234`.
 
@@ -37,6 +37,7 @@ Customer portal: use a customer number (e.g. `CUS-001`) or phone number, with pa
 - **Customers & Sales** — customer records with NIDA and next of kin, plot purchase agreements, deposits, agents and fixed/flexible installment plans. Customers automatically receive a view-only portal account.
 - **Installment Management** — fixed 6/12/18/24-month and flexible plans, weekly or monthly schedules, progress rings, paid/pending/overdue states and a printable statement.
 - **Payment Management** — M-Pesa, Tigo Pesa, Airtel Money, bank transfer, cash and cheque. Recording a payment updates the balance, allocation, installment progress and generates a printable simulated receipt.
+- **Expenditure** — company spending register with categories, payee, project allocation and period filters, category/trend charts and a printable expenditure report. **Only the Accountant records expenditure**; Owner and Manager have read-only oversight; Cashier has no access. No approval, correction or reversal workflow is simulated.
 - **Notifications & Reminders** — customer reminders, confirmations, receipts and an internal notification centre with the Accountant's "You have a new message." alert. Channels are interface previews only.
 - **Reports** — daily/weekly/monthly/annual and custom ranges, printable reports, and role differences (Owner sees all report categories; Manager sees operational reports and staff activity; land and customer reports are Owner-only).
 - **User Management** — Owner-only role assignment and privilege changes, staff activity, suspension/reactivation. Manager access is read-only.

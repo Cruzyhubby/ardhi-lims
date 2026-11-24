@@ -8,10 +8,10 @@
   const state = { tab: 'users', q: '', role: 'all', status: 'all' };
 
   const ROLES = {
-    Owner: { icon: 'shield-check', desc: 'Full system access, all reports, user management, privileges and sensitive settings.' },
-    Manager: { icon: 'users', desc: 'Daily operations, staff supervision and operational reports. No privilege management.' },
-    Accountant: { icon: 'receipt', desc: 'Finance account with assigned access. Detailed permissions pending clarification.' },
-    Cashier: { icon: 'cash', desc: 'Payments account with assigned access. Detailed permissions pending clarification.' }
+    Owner: { icon: 'shield-check', desc: 'Full system access and all reports. Expenditure entry is restricted to the Accountant as a control.' },
+    Manager: { icon: 'users', desc: 'Daily operations, staff supervision and operational reports. No privilege management and no expenditure entry.' },
+    Accountant: { icon: 'receipt', desc: 'Finance account: records payments and manages expenditure entry. Other permissions pending clarification.' },
+    Cashier: { icon: 'cash', desc: 'Collections account: records payments, customers and sales. No expenditure access.' }
   };
 
   const ROLE_ACCESS = {
@@ -27,6 +27,7 @@
     { label: 'Customer & sales records', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
     { label: 'Installment management', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
     { label: 'Record payments', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
+    { label: 'Record expenditure', Owner: 'view', Manager: 'view', Accountant: true, Cashier: false },
     { label: 'Notifications & reminders', Owner: true, Manager: true, Accountant: true, Cashier: 'pending' },
     { label: 'Operational reports', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
     { label: 'All business reports', Owner: true, Manager: false, Accountant: false, Cashier: false },
@@ -119,6 +120,8 @@
   function roleNotice(role) {
     if (role === 'Owner') return '<div class="notice green">' + Icons.get('shield-check') + '<div><strong>Owner.</strong> Full system access, all reports, user management, privilege management and sensitive settings. Only the Owner can assign, change or remove privileges.</div></div>';
     if (role === 'Manager') return '<div class="notice info">' + Icons.get('info') + '<div><strong>Manager.</strong> Daily operations, staff supervision and operational reports based on their own activities and staff reporting to them. <strong>No privilege management.</strong></div></div>';
+    if (role === 'Accountant') return '<div class="notice warn">' + Icons.get('alert') + '<div><strong>Accountant.</strong> Individual account with assigned access. <strong>Expenditure entry is confirmed for this role</strong>; other permissions remain pending clarification.</div></div>';
+    if (role === 'Cashier') return '<div class="notice warn">' + Icons.get('alert') + '<div><strong>Cashier.</strong> Collections account for payments, customers and sales. <strong>No expenditure access.</strong> Other permissions remain pending clarification.</div></div>';
     return '<div class="notice warn">' + Icons.get('alert') + '<div><strong>' + role + '.</strong> Individual account with assigned access. The PRD states that complete permissions are still pending clarification, so none are finalised here.</div></div>';
   }
 
