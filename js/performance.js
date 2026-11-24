@@ -12,7 +12,33 @@
   ];
   const state = { period: 'month' };
   const METHOD_COLORS = { 'M-Pesa': '#16A34A', 'Tigo Pesa': '#2563EB', 'Airtel Money': '#F59E0B', 'Bank Transfer': '#8B5CF6', 'Cash': '#0EA5E9', 'Cheque': '#64748B' };
+  const ROLE_SCOPE = {
+    Owner: {
+      duties: ['Oversee all records', 'Record payments and sales', 'Manage users and settings', 'View all reports'],
+      limits: ['Expenditure entry is read-only', 'Approval, correction and reversal workflows are not simulated']
+    },
+    Manager: {
+      duties: ['Land, customer and sales records', 'Record payments and sales', 'Operational reports', 'Staff supervision'],
+      limits: ['Expenditure entry is read-only', 'No user privilege changes', 'Land and customer reports are Owner-only']
+    },
+    Accountant: {
+      duties: ['Record payments', 'Record expenditure', 'View financial report', 'Notifications & reminders'],
+      limits: ['No land, customer or sales entry', 'No user management or settings changes', 'Full role permissions pending PRD confirmation']
+    },
+    Cashier: {
+      duties: ['Record payments', 'Register customers and sales', 'View installments', 'Notifications & reminders'],
+      limits: ['No expenditure access', 'No land records', 'No reports, user management or settings', 'Full role permissions pending PRD confirmation']
+    }
+  };
   const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
+
+  function accountScope(me) {
+    const s = ROLE_SCOPE[me.role] || { duties: [], limits: ['Role scope is not defined in this prototype.'] };
+    return '<div class="card perf-scope-card"><div class="card-body perf-scope">' +
+      '<div><div class="perf-scope-lbl">This account can</div><div class="perf-chips">' + s.duties.map(x => '<span class="chip">' + UI.esc(x) + '</span>').join('') + '</div></div>' +
+      '<div><div class="perf-scope-lbl">Not available to this account</div><ul class="perf-limits">' + s.limits.map(x => '<li>' + UI.esc(x) + '</li>').join('') + '</ul></div>' +
+    '</div></div>';
+  }
 
   function range() {
     const t = Store.today();
@@ -100,24 +126,33 @@
 
   function printReport(d) {
     const s = Store.db.settings;
+    const canSell = App.can('saleWrite');
+    const canExpense = App.can('expenseWrite');
+    const scope = ROLE_SCOPE[d.me.role] || { duties: [], limits: [] };
+    const roleMetric = canSell
+      ? '<div><strong>Sales registered</strong><br>' + UI.money(d.salesValue) + '</div>'
+      : canExpense
+        ? '<div><strong>Expenditure entered</strong><br>' + UI.money(d.spend) + '</div>'
+        : '';
     const doc = document.createElement('div');
     doc.innerHTML = '<div class="print-letterhead"><div><div class="nm">' + UI.esc(s.companyName) + '</div><div class="sub">' + UI.esc(s.companyAddress) + '</div><div class="sub">' + UI.esc(s.companyPhone) + ' · ' + UI.esc(s.companyEmail) + '</div></div>' +
       '<div style="text-align:right"><div class="nm" style="font-size:12px">My performance</div><div class="sub">' + UI.esc(d.me.name) + ' · ' + UI.esc(d.me.role) + '</div><div class="sub">' + UI.esc(d.r.label) + ' · generated ' + UI.date(Store.iso(Store.today())) + '</div></div></div>' +
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;font-size:10.5px">' +
         '<div><strong>Collected by me</strong><br>' + UI.money(d.revenue) + '</div>' +
         '<div><strong>Receipts issued</strong><br>' + d.payments.length + '</div>' +
-        '<div><strong>Sales registered</strong><br>' + UI.money(d.salesValue) + '</div>' +
-        '<div><strong>Expenditure entered</strong><br>' + UI.money(d.spend) + '</div>' +
+        roleMetric +
         '<div><strong>Customers served</strong><br>' + d.customersServed + '</div>' +
         '<div><strong>Average receipt</strong><br>' + UI.money(d.avgReceipt) + '</div>' +
+        '<div><strong>Deposits / installments</strong><br>' + UI.money(d.deposits) + ' / ' + UI.money(d.installments) + '</div>' +
         '<div><strong>Share of team collections</strong><br>' + pct(d.revenue, d.teamRevenue) + '%</div>' +
         '<div><strong>Activities logged</strong><br>' + d.activity.length + '</div>' +
       '</div>' +
+      '<p style="font-size:10px;color:#555;margin-bottom:12px"><strong>Account scope:</strong> ' + UI.esc(scope.duties.join(', ')) + '<br><strong>Limitations:</strong> ' + UI.esc(scope.limits.join('; ')) + '.</p>' +
       '<h4 style="font-size:11px;margin:12px 0 6px">Payments recorded</h4>' + collectionsTable(d) +
-      '<h4 style="font-size:11px;margin:14px 0 6px">Sales registered</h4>' + salesTable(d) +
-      '<h4 style="font-size:11px;margin:14px 0 6px">Expenditure entered</h4>' + expenseTable(d) +
+      (canSell ? '<h4 style="font-size:11px;margin:14px 0 6px">Sales registered</h4>' + salesTable(d) : '') +
+      (canExpense ? '<h4 style="font-size:11px;margin:14px 0 6px">Expenditure entered</h4>' + expenseTable(d) : '') +
       '<h4 style="font-size:11px;margin:14px 0 6px">Activity log</h4>' + (d.activity.map(a => '<div style="font-size:10.5px;padding:3px 0;border-bottom:1px solid #eee">' + UI.esc(UI.dateTime(a.date)) + ' · ' + UI.esc(a.module) + ' — ' + UI.esc(a.action) + '</div>').join('') || '<div style="font-size:10.5px">No activity in this period.</div>') +
-      '<p style="font-size:10px;color:#777;margin-top:12px">Personal activity summary from the Ardhi prototype. Totals are based on records attributed to this account. No appraisal score, target, commission or ranking is calculated.</p>';
+      '<p style="font-size:10px;color:#777;margin-top:12px">Personal activity summary from the Ardhi prototype. Only records attributed to this account are included. No appraisal score, target, commission or ranking is calculated.</p>';
     UI.printElement(doc, 'My performance — ' + d.me.name);
   }
 
@@ -127,38 +162,49 @@
       const canSell = App.can('saleWrite');
       const canExpense = App.can('expenseWrite');
       const period = PERIODS.find(p => p.value === state.period) || PERIODS[0];
+      const roleStat = canSell
+        ? '<div class="mini-stat"><div class="ms-icon">' + Icons.get('sales') + '</div><div><div class="k">Sales registered</div><div class="v">' + UI.moneyShort(d.salesValue) + '</div><div class="small muted">' + d.sales.length + ' agreement(s) under your name</div></div></div>'
+        : canExpense
+          ? '<div class="mini-stat"><div class="ms-icon amber">' + Icons.get('target') + '</div><div><div class="k">Expenditure entered</div><div class="v">' + UI.moneyShort(d.spend) + '</div><div class="small muted">' + d.expenses.length + ' voucher(s) under your account</div></div></div>'
+          : '';
+      const stats =
+        '<div class="mini-stat"><div class="ms-icon green">' + Icons.get('cash') + '</div><div><div class="k">Collected by me</div><div class="v">' + UI.moneyShort(d.revenue) + '</div><div class="small muted">' + d.payments.length + ' receipt(s) issued</div></div></div>' +
+        '<div class="mini-stat"><div class="ms-icon blue">' + Icons.get('receipt') + '</div><div><div class="k">Receipts issued</div><div class="v">' + d.payments.length + '</div><div class="small muted">Across ' + d.acceptedCards + ' payment method(s)</div></div></div>' +
+        roleStat +
+        '<div class="mini-stat"><div class="ms-icon blue">' + Icons.get('customers') + '</div><div><div class="k">Customers served</div><div class="v">' + d.customersServed + '</div><div class="small muted">Customers in your receipts</div></div></div>' +
+        '<div class="mini-stat"><div class="ms-icon green">' + Icons.get('installments') + '</div><div><div class="k">Average receipt</div><div class="v">' + (d.payments.length ? UI.moneyShort(d.avgReceipt) : '—') + '</div><div class="small muted">Per receipt you recorded</div></div></div>' +
+        '<div class="mini-stat"><div class="ms-icon">' + Icons.get('layers') + '</div><div><div class="k">Deposits vs installments</div><div class="v">' + UI.moneyShort(d.deposits) + '</div><div class="small muted">Installments ' + UI.moneyShort(d.installments) + '</div></div></div>' +
+        '<div class="mini-stat"><div class="ms-icon">' + Icons.get('reports') + '</div><div><div class="k">Team collections share</div><div class="v">' + pct(d.revenue, d.teamRevenue) + '%</div><div class="small muted">Your share of ' + UI.moneyShort(d.teamRevenue) + '</div></div></div>' +
+        '<div class="mini-stat"><div class="ms-icon amber">' + Icons.get('clock') + '</div><div><div class="k">Activities logged</div><div class="v">' + d.activity.length + '</div><div class="small muted">Actions attributed to you</div></div></div>';
+      const salesCard = '<div class="card"><div class="card-head"><div><h3>Sales I registered</h3><div class="sub">Agreements attributed to your name</div></div></div>' + salesTable(d) + '</div>';
+      const expenseCard = '<div class="card"><div class="card-head"><div><h3>Expenditure I entered</h3><div class="sub">Vouchers recorded under your account</div></div></div>' + expenseTable(d) + '</div>';
+      const roleTables = (canSell && canExpense)
+        ? '<div class="split-2" style="margin-top:16px">' + salesCard + expenseCard + '</div>'
+        : canSell
+          ? '<div class="card" style="margin-top:16px">' + salesCard + '</div>'
+          : canExpense
+            ? '<div class="card" style="margin-top:16px">' + expenseCard + '</div>'
+            : '';
       return '<div class="page">' +
-        '<div class="page-head-row"><div><h2>My performance</h2><div class="sub">Your recorded activity, collections and agreements for the selected period.</div></div>' +
+        '<div class="page-head-row"><div><h2>My performance</h2><div class="sub">Personal report for ' + UI.esc(d.me.name) + ' · ' + UI.esc(d.me.role) + '. Only records attributed to this account are included, and only the sections allowed for this role are shown.</div></div>' +
           '<div class="page-actions"><button class="btn btn-primary" data-act="print">' + Icons.get('print') + 'Print my report</button></div></div>' +
         '<div class="card" style="margin-bottom:16px"><div class="card-body" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">' +
           UI.avatar(d.me.name) +
           '<div style="flex:1;min-width:180px"><div style="font-weight:650;font-size:15px">' + UI.esc(d.me.name) + '</div><div class="muted small">' + UI.esc(d.me.role) + ' · ' + UI.esc(d.me.email) + '</div></div>' +
+          '<span class="chip">Personal account report</span>' +
           '<select class="select" id="perfPeriod">' + UI.options(PERIODS, state.period) + '</select>' +
           '<span class="chip">' + UI.esc(period.label) + '</span>' +
         '</div></div>' +
-        '<div class="mini-stats">' +
-          '<div class="mini-stat"><div class="ms-icon green">' + Icons.get('cash') + '</div><div><div class="k">Collected by me</div><div class="v">' + UI.moneyShort(d.revenue) + '</div><div class="small muted">' + d.payments.length + ' receipt(s) issued</div></div></div>' +
-          '<div class="mini-stat"><div class="ms-icon blue">' + Icons.get('receipt') + '</div><div><div class="k">Receipts issued</div><div class="v">' + d.payments.length + '</div><div class="small muted">Across ' + d.acceptedCards + ' payment method(s)</div></div></div>' +
-          '<div class="mini-stat"><div class="ms-icon">' + Icons.get('sales') + '</div><div><div class="k">Sales registered</div><div class="v">' + (canSell ? UI.moneyShort(d.salesValue) : '—') + '</div><div class="small muted">' + (canSell ? d.sales.length + ' agreement(s)' : 'Not part of this role') + '</div></div></div>' +
-          '<div class="mini-stat"><div class="ms-icon amber">' + Icons.get('target') + '</div><div><div class="k">Expenditure entered</div><div class="v">' + (canExpense ? UI.moneyShort(d.spend) : '—') + '</div><div class="small muted">' + (canExpense ? d.expenses.length + ' entr' + (d.expenses.length === 1 ? 'y' : 'ies') : 'Read-only for this role') + '</div></div></div>' +
-        '</div>' +
-        '<div class="mini-stats" style="margin-top:12px">' +
-          '<div class="mini-stat"><div class="ms-icon blue">' + Icons.get('customers') + '</div><div><div class="k">Customers served</div><div class="v">' + d.customersServed + '</div><div class="small muted">Customers in your receipts</div></div></div>' +
-          '<div class="mini-stat"><div class="ms-icon green">' + Icons.get('installments') + '</div><div><div class="k">Average receipt</div><div class="v">' + (d.payments.length ? UI.moneyShort(d.avgReceipt) : '—') + '</div><div class="small muted">Deposits ' + UI.moneyShort(d.deposits) + ' · installments ' + UI.moneyShort(d.installments) + '</div></div></div>' +
-          '<div class="mini-stat"><div class="ms-icon">' + Icons.get('reports') + '</div><div><div class="k">Team collections share</div><div class="v">' + pct(d.revenue, d.teamRevenue) + '%</div><div class="small muted">Your share of ' + UI.moneyShort(d.teamRevenue) + '</div></div></div>' +
-          '<div class="mini-stat"><div class="ms-icon amber">' + Icons.get('clock') + '</div><div><div class="k">Activities logged</div><div class="v">' + d.activity.length + '</div><div class="small muted">Actions attributed to you</div></div></div>' +
-        '</div>' +
+        accountScope(d.me) +
+        '<div class="mini-stats" style="margin-top:16px">' + stats + '</div>' +
         '<div class="split-2" style="margin-top:16px">' +
           '<div class="card"><div class="card-head"><div><h3>My collections</h3><div class="sub">Last six months · recorded by you</div></div></div><div class="card-body" id="perfTrend"></div></div>' +
           '<div class="card"><div class="card-head"><div><h3>My payment methods</h3><div class="sub">' + UI.esc(period.label) + '</div></div></div><div class="card-body" id="perfMethods"></div></div>' +
         '</div>' +
         '<div class="card" style="margin-top:16px"><div class="card-head"><div><h3>Payments I recorded</h3><div class="sub">Latest 10 receipts in the selected period</div></div><div class="right"><span class="chip">' + d.payments.length + ' total</span></div></div>' + collectionsTable(d, 10) + '</div>' +
-        '<div class="split-2" style="margin-top:16px">' +
-          '<div class="card"><div class="card-head"><div><h3>Sales I registered</h3><div class="sub">Agreements attributed to your name</div></div></div>' + salesTable(d) + '</div>' +
-          '<div class="card"><div class="card-head"><div><h3>Expenditure I entered</h3><div class="sub">Vouchers recorded under your account</div></div></div>' + expenseTable(d) + '</div>' +
-        '</div>' +
+        roleTables +
         '<div class="card" style="margin-top:16px"><div class="card-head"><div><h3>My activity log</h3><div class="sub">Latest actions attributed to your account</div></div><div class="right"><span class="chip">' + d.activity.length + ' in period</span></div></div><div class="card-body">' + activityBlock(d, 12) + '</div></div>' +
-        '<div class="notice info" style="margin-top:16px">' + Icons.get('info') + '<div><strong>How this is calculated.</strong> Figures come from payment, sale, expenditure and activity records attributed to <strong>' + UI.esc(d.me.name) + '</strong>. This is a factual activity summary — no appraisal score, commission, target or ranking is applied.</div></div>' +
+        '<div class="notice info" style="margin-top:16px">' + Icons.get('info') + '<div><strong>Personal report.</strong> Figures come only from payment, sale, expenditure and activity records attributed to <strong>' + UI.esc(d.me.name) + '</strong>, and sections outside this account\'s role are hidden. No appraisal score, commission, target or ranking is applied.</div></div>' +
       '</div>';
     },
 

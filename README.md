@@ -33,7 +33,7 @@ Customer portal: use a customer number (e.g. `CUS-001`) or phone number, with pa
 ## What is included
 
 - **Dashboard** — KPI cards, 8-month collections chart, portfolio donut, project performance, overdue overview, recent payments/sales, upcoming installments and staff activity.
-- **My Performance** — personal activity report for every demo account: payments/collections recorded by the signed-in user, receipts, sales attributed to them, expenditure entries, customers served, team share, six-month trend and the account's activity log, with a printable personal report. No appraisal scores, targets or rankings are calculated.
+- **My Performance** — a separate personal report for each signed-in account, built only from records attributed to that user (payments, sales, expenditure, activity). Sections and metrics follow the account's role and limitations: Accountant sees payments and expenditure but no sales entry; Cashier sees collections and sales but no expenditure; Owner/Manager see read-only expenditure. Shows the account's own duties/limitations, six-month trend, payment methods and a printable personal report. No appraisal scores, targets or rankings are calculated.
 - **Land Management** — projects and plots (CRUD), statuses, intended use, location class, plus a clearly labelled *prototype visualisation* of physical maps (no interactive digital mapping is claimed).
 - **Customers & Sales** — customer records with NIDA and next of kin, plot purchase agreements, deposits, agents and fixed/flexible installment plans. Customers automatically receive a view-only portal account.
 - **Installment Management** — fixed 6/12/18/24-month and flexible plans, weekly or monthly schedules, progress rings, paid/pending/overdue states and a printable statement.
