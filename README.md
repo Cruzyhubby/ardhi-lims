@@ -40,6 +40,7 @@ Customer portal: use a customer number (e.g. `CUS-001`) or phone number, with pa
 - **Expenditure** — company spending register with categories, payee, project allocation and period filters, category/trend charts and a printable expenditure report. **Only the Accountant records expenditure**; Owner and Manager have read-only oversight; Cashier has no access. No approval, correction or reversal workflow is simulated.
 - **Notifications & Reminders** — customer reminders, confirmations, receipts and an internal notification centre with the Accountant's "You have a new message." alert. Channels are interface previews only.
 - **Reports** — daily/weekly/monthly/annual and custom ranges, printable reports, and role differences (Owner sees all report categories; Manager sees operational reports and staff activity; land and customer reports are Owner-only).
+- **Financial Report** — consolidated revenue and expenditure statement: money collected by payment method, agreements in period, expenditure by category, net position, outstanding and overdue receivables, per-project summary, six-month revenue-vs-expenditure trend and a combined cashbook of every simulated money movement. Printable; visible to Owner, Manager and Accountant; no reversal or approval workflow is simulated.
 - **User Management** — Owner-only role assignment and privilege changes, staff activity, suspension/reactivation. Manager access is read-only.
 - **Settings** — company profile, receipt prefix, reminder lead time, grace period, payment methods, channel connection status and demo data reset.
 - **Customer portal** (`customer-portal.html`) — view-only plot details, paid/balance, schedule, payment history, printable receipts, agreement/schedule downloads and plot-size increase requests. No online payments, invoices, editing or access to other customers' data.
@@ -66,7 +67,8 @@ js/icons.js              Inline SVG icon set
 js/sample-data.js        Deterministic fictional seed data
 js/store.js              Persistence, domain logic, calculations
 js/ui.js                 UI utilities, charts, modals, toasts, printing
-js/dashboard.js ... js/settings.js   Feature modules
+js/expenditure.js         Expenditure register and entry
+js/financial.js          Consolidated revenue & expenditure report
 js/app.js                Routing, auth/session, navigation shell
 js/customer-portal.js    Portal logic
 ```

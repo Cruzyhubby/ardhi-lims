@@ -20,7 +20,8 @@
     { group: 'Finance', items: [
       { id: 'installments', label: 'Installment Management', icon: 'installments', title: 'Installment Management', crumb: 'Finance' },
       { id: 'payments', label: 'Payment Management', icon: 'payments', title: 'Payment Management', crumb: 'Finance' },
-      { id: 'expenditures', label: 'Expenditure', icon: 'cash', title: 'Expenditure', crumb: 'Finance' }
+      { id: 'expenditures', label: 'Expenditure', icon: 'cash', title: 'Expenditure', crumb: 'Finance' },
+      { id: 'financials', label: 'Financial Report', icon: 'reports', title: 'Financial Report', crumb: 'Finance' }
     ]},
     { group: 'Operations', items: [
       { id: 'notifications', label: 'Notifications & Reminders', icon: 'bell', title: 'Notifications & Reminders', crumb: 'Operations', badge: true },
@@ -33,9 +34,9 @@
   ];
 
   const MODULES_BY_ROLE = {
-    Owner: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'notifications', 'reports', 'users', 'settings'],
-    Manager: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'notifications', 'reports', 'users', 'settings'],
-    Accountant: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'notifications'],
+    Owner: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications', 'reports', 'users', 'settings'],
+    Manager: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications', 'reports', 'users', 'settings'],
+    Accountant: ['dashboard', 'land', 'customers', 'sales', 'installments', 'payments', 'expenditures', 'financials', 'notifications'],
     Cashier: ['dashboard', 'customers', 'sales', 'installments', 'payments', 'notifications']
   };
 
@@ -349,6 +350,7 @@
     installments: ['Installment Management', 'Finance'],
     payments: ['Payment Management', 'Finance'],
     expenditures: ['Expenditure', 'Finance'],
+    financials: ['Financial Report', 'Finance'],
     notifications: ['Notifications & Reminders', 'Operations'],
     reports: ['Reports', 'Operations'],
     users: ['User Management', 'Administration'],

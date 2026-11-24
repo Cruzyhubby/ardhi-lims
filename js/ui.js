@@ -365,7 +365,7 @@
         '<div class="ring-label"><div class="v">' + esc(cfg.centerValue != null ? cfg.centerValue : total) + '</div><div class="k">' + esc(cfg.centerLabel || '') + '</div></div>' +
       '</div>' +
       '<div style="display:grid;gap:9px;min-width:130px">' + segs.map(s =>
-        '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:9px;height:9px;border-radius:3px;background:' + s.color + '"></span><span style="flex:1;color:var(--muted)">' + esc(s.label) + '</span><strong style="font-variant-numeric:tabular-nums">' + s.value + '</strong></div>'
+        '<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:9px;height:9px;border-radius:3px;background:' + s.color + '"></span><span style="flex:1;color:var(--muted)">' + esc(s.label) + '</span><strong style="font-variant-numeric:tabular-nums">' + esc(cfg.format ? cfg.format(s.value) : s.value) + '</strong></div>'
       ).join('') + '</div></div>';
   }
 

@@ -31,6 +31,7 @@
     { label: 'Notifications & reminders', Owner: true, Manager: true, Accountant: true, Cashier: 'pending' },
     { label: 'Operational reports', Owner: true, Manager: true, Accountant: 'pending', Cashier: 'pending' },
     { label: 'All business reports', Owner: true, Manager: false, Accountant: false, Cashier: false },
+    { label: 'Financial report (revenue & expenditure)', Owner: true, Manager: true, Accountant: true, Cashier: false },
     { label: 'User management', Owner: true, Manager: 'view', Accountant: false, Cashier: false },
     { label: 'Role & privilege management', Owner: true, Manager: false, Accountant: false, Cashier: false },
     { label: 'Sensitive settings', Owner: true, Manager: false, Accountant: false, Cashier: false }
@@ -198,11 +199,11 @@
       const internal = Store.db.activity.filter(a => a.module === 'User Management').slice(0, 6);
 
       const rolesTab = '<div class="card-body">' +
-        '<div class="notice warn" style="margin-bottom:16px">' + Icons.get('alert') + '<div><strong>Only the Owner can assign, change or remove user privileges.</strong> The Manager can supervise staff but must not access privilege management. Accountant and Cashier permissions remain pending clarification.</div></div>' +
+        '<div class="notice warn" style="margin-bottom:16px">' + Icons.get('alert') + '<div><strong>Only the Owner can assign, change or remove user privileges.</strong> The Manager can supervise staff but must not access privilege management. Accountant and Cashier permissions remain pending clarification, except expenditure entry (Accountant) and financial report viewing (Owner, Manager, Accountant).</div></div>' +
         '<div style="overflow:auto"><table class="perm-matrix"><thead><tr><th>Capability</th><th class="center">Owner</th><th class="center">Manager</th><th class="center">Accountant</th><th class="center">Cashier</th></tr></thead><tbody>' +
           PERM_ROWS.map(r => '<tr><td>' + UI.esc(r.label) + '</td><td class="center">' + permCell(r.Owner) + '</td><td class="center">' + permCell(r.Manager) + '</td><td class="center">' + permCell(r.Accountant) + '</td><td class="center">' + permCell(r.Cashier) + '</td></tr>').join('') +
         '</tbody></table></div>' +
-        '<div class="notice" style="margin-top:16px">' + Icons.get('info') + '<div><strong>Pending clarification.</strong> The detailed permission sets for the Accountant and Cashier, and the Manager\'s exact staff reporting scope, are not finalised in the PRD. The matrix marks those cells as pending rather than inventing access rights.</div></div>' +
+        '<div class="notice" style="margin-top:16px">' + Icons.get('info') + '<div><strong>Pending clarification.</strong> The detailed permission sets for the Accountant and Cashier, and the Manager\'s exact staff reporting scope, are not finalised in the PRD. The matrix marks those cells as pending rather than inventing access rights; expenditure entry and the financial report are the confirmed exceptions.</div></div>' +
       '</div>';
 
       const usersTab =
