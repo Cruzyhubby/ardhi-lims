@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ardhi customer portal — view your plot, installments and payment receipts." />
+  <title>Ardhi Customer Portal — My Land Account</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2316A34A'/%3E%3Cpath d='M7 16.5 12 7l5 9.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/modules.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+</head>
+<body class="portal-body">
+
+  <!-- ===================== Portal sign in ===================== -->
+  <section class="login-screen portal-login" id="portalLogin">
+    <div class="login-art">
+      <div class="top">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="brand-mark" data-icon-mark="1"></div>
+          <div>
+            <div style="font-size:18px;font-weight:700;letter-spacing:-.02em">Ardhi</div>
+            <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8B978C">Customer Portal</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <span class="art-badge"><span class="dot"></span> View-only customer access</span>
+        <h2>Your plot, your schedule, your <em>receipts</em>.</h2>
+        <p class="lead">Sign in to follow your land purchase — installment schedule, payments made, outstanding balance and purchase documents.</p>
+        <div class="login-points">
+          <div class="row"><span data-icon="land"></span> Plot and project information</div>
+          <div class="row"><span data-icon="installments"></span> Installment schedule and progress</div>
+          <div class="row"><span data-icon="receipt"></span> Payment history and printable receipts</div>
+          <div class="row"><span data-icon="file"></span> Purchase agreement and documents</div>
+        </div>
+      </div>
+      <div class="foot">
+        <div>Customer portal · Demonstration environment with fictional data</div>
+        <div style="margin-top:4px">View-only: no online payments, account edits or invoices.</div>
+      </div>
+    </div>
+
+    <div class="login-main">
+      <div class="login-box">
+        <div class="brand">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="brand-mark" data-icon-mark="1"></div>
+            <div>
+              <div style="font-size:16px;font-weight:700">Ardhi</div>
+              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Customer portal</div>
+            </div>
+          </div>
+        </div>
+        <h1>My land account</h1>
+        <p class="sub">Use your customer number or registered phone number to sign in.</p>
+
+        <form class="login-form" id="portalLoginForm" novalidate>
+          <div class="field" data-field="identifier">
+            <label for="portalId">Customer number or phone <span class="req">*</span></label>
+            <input class="input" type="text" id="portalId" name="identifier" placeholder="e.g. CUS-001 or +255 754 111 001" autocomplete="username" />
+            <span class="error-msg">Enter your customer number or registered phone number.</span>
+          </div>
+          <div class="field" data-field="password">
+            <label for="portalPassword">Password <span class="req">*</span></label>
+            <input class="input" type="password" id="portalPassword" name="password" placeholder="Enter your password" autocomplete="current-password" />
+            <span class="error-msg">Enter your password.</span>
+          </div>
+          <div class="login-hint">
+            <span data-icon="info"></span>
+            <span>Prototype login — demo password <strong>demo1234</strong>. Accounts are created automatically when a customer is registered by staff.</span>
+          </div>
+          <div id="portalLoginError" class="notice warn" style="display:none"> <span data-icon="alert"></span><div></div></div>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" id="portalLoginSubmit">Sign in to my account</button>
+        </form>
+
+        <div class="demo-accounts">
+          <div class="cap">Demo customer accounts</div>
+          <div class="grid" id="portalDemoAccounts"></div>
+        </div>
+
+        <div style="margin-top:22px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)">
+          <a href="index.html">Staff sign in</a>
+          <span>View-only portal · Mockup</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Portal shell ===================== -->
+  <div class="portal-shell" id="portalShell">
+    <header class="portal-head">
+      <div class="portal-brand">
+        <div class="brand-mark" data-icon-mark="1"></div>
+        <div>
+          <div class="name">Ardhi</div>
+          <div class="tag">Customer Portal</div>
+        </div>
+        <span class="badge green no-dot" style="margin-left:6px">View only</span>
+      </div>
+      <nav class="portal-nav" id="portalNav" aria-label="Customer portal navigation">
+        <button data-section="overview" class="active"><span data-icon="dashboard"></span> Overview</button>
+        <button data-section="schedule"><span data-icon="installments"></span> Schedule</button>
+        <button data-section="payments"><span data-icon="receipt"></span> Payments</button>
+        <button data-section="documents"><span data-icon="file"></span> Documents</button>
+        <button data-section="requests"><span data-icon="send"></span> Requests</button>
+      </nav>
+      <div class="portal-account">
+        <div class="portal-user" id="portalUser"></div>
+        <button class="icon-btn" id="portalLogout" aria-label="Sign out" title="Sign out" data-icon-btn="logout"></button>
+      </div>
+    </header>
+
+    <main class="portal-main" id="portalView"></main>
+
+    <footer class="portal-foot">
+      <span>Ardhi customer portal · Frontend prototype. All plots, customers and transactions are fictional.</span>
+      <span>No online payments, account editing, invoices or access to other customers' records.</span>
+    </footer>
+  </div>
+
+  <div id="modalRoot"></div>
+  <div class="toast-root" id="toastRoot" aria-live="polite"></div>
+  <div id="printArea"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/sample-data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/customer-portal.js"></script>
+</body>
+</html>
